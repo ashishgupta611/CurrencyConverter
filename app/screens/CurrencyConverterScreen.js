@@ -35,11 +35,21 @@ const CurrencyConverterScreen = () => {
   const baseCurrencyRef = useRef(baseCurrency);
 
   useEffect(() => {
+    if (results.length > 0 && baseAmountRef.current !== amount) {
+      setResults([]);
+    }
+  }, [amount]);
+
+  useEffect(() => {
     setAmount(baseAmount);
   }, [baseAmount]);
 
   useEffect(() => {
     if (baseAmountRef.current !== baseAmount && baseCurrencyRef.current !== baseCurrency) {
+      const conversions = getConversions(baseAmount);
+      setResults(conversions);
+    }
+    else if (results.length > 0) {
       setResults([]);
     }
     baseAmountRef.current = baseAmount;
