@@ -1,19 +1,17 @@
 import React, { useContext } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import HistoryContext from '../context/HistoryContext';
+import { styles } from '../styles/HistoryStyle';
 
 const HistoryScreen = () => {
   const navigation = useNavigation();
-  const { history } = useContext(HistoryContext);
+  const { history, setBaseCurrency, setBaseAmount } = useContext(HistoryContext);
 
   const handleItemPress = (item) => {
-    navigation.navigate('CurrencyConverter', {
-      conversion: {
-        baseCurrency: item.baseCurrency,
-        amount: item.amount,
-      }
-    });
+    navigation.goBack();
+    setBaseCurrency(item.baseCurrency);
+    setBaseAmount(`${item.amount}`);
   };
 
   return (
@@ -43,32 +41,5 @@ const HistoryScreen = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#f5f5f5',
-  },
-  item: {
-    backgroundColor: 'white',
-    padding: 15,
-    marginVertical: 5,
-    borderRadius: 5,
-  },
-  date: {
-    color: '#666',
-    fontSize: 12,
-  },
-  conversionText: {
-    fontSize: 16,
-    marginTop: 5,
-  },
-  emptyText: {
-    textAlign: 'center',
-    marginTop: 20,
-    color: '#666',
-  },
-});
 
 export default HistoryScreen;
