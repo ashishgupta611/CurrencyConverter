@@ -1,5 +1,5 @@
 import React, {createContext, useState, useEffect, useRef } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { saveItem, loadStateItem } from '../services/StorageService';
 import {STRINGS} from '../constants';
 
 const HistoryContext = createContext();
@@ -11,102 +11,37 @@ export const HistoryProvider = ({children}) => {
   const historyRef = useRef(history);
 
   useEffect(() => {
-    const loadHistory = async () => {
-      try {
-        const storedHistory = await AsyncStorage.getItem(
-          STRINGS.conversionHistory,
-        );
-        if (storedHistory) {
-          setHistory(JSON.parse(storedHistory));
-        }
-      } catch (error) {
-        console.error('Error loading history:', error);
-      }
-    };
-    loadHistory();
+    loadStateItem(STRINGS.conversionHistory, setHistory);
   }, []);
 
   useEffect(() => {
-    const loadHistory = async () => {
-      try {
-        const storedBaseAmount = await AsyncStorage.getItem(STRINGS.baseAmount);
-        console.log(`storedBaseAmount=${storedBaseAmount ?? ''}`);
-        if (storedBaseAmount) {
-          setBaseAmount(storedBaseAmount);
-        }
-      } catch (error) {
-        console.error('Error loading history:', error);
-      }
-    };
-    loadHistory();
+    loadStateItem(STRINGS.baseAmount, setBaseAmount);
   }, []);
 
   useEffect(() => {
-    const loadHistory = async () => {
-      try {
-        const storedBaseCurrency = await AsyncStorage.getItem(
-          STRINGS.baseCurrency,
-        );
-        console.log(`storedBaseCurrency=${storedBaseCurrency ?? ''}`);
-        if (storedBaseCurrency) {
-          setBaseCurrency(storedBaseCurrency);
-        }
-      } catch (error) {
-        console.error('Error loading history:', error);
-      }
-    };
-    loadHistory();
+    loadStateItem(STRINGS.baseCurrency, setBaseCurrency);
   }, []);
 
   useEffect(() => {
     historyRef.current = history;
-    const saveHistory = async () => {
-      try {
-        await AsyncStorage.setItem(
-          STRINGS.conversionHistory,
-          JSON.stringify(history),
-        );
-      } catch (error) {
-        console.error('Error saving history:', error);
-      }
-    };
-    saveHistory();
+    saveItem(STRINGS.conversionHistory, JSON.stringify(history));
   }, [history]);
 
   useEffect(() => {
-    const saveBaseCurrency = async () => {
-      try {
-        await AsyncStorage.setItem(STRINGS.baseCurrency, baseCurrency);
-      } catch (error) {
-        console.error('Error saving base currency:', error);
-      }
-    };
-    saveBaseCurrency();
+    saveItem(STRINGS.baseCurrency, baseCurrency);
   }, [baseCurrency]);
 
   useEffect(() => {
-    const saveBaseAmount = async () => {
-      try {
-        await AsyncStorage.setItem(STRINGS.baseAmount, baseAmount);
-      } catch (error) {
-        console.error('Error saving base amount:', error);
-      }
-    };
-    saveBaseAmount();
+    saveItem(STRINGS.baseAmount, baseAmount);
   }, [baseAmount]);
 
   const isDuplicate = conversion => {
-    return historyRef.current.some(
-      item =>
-        item.amount === conversion.amount &&
-        item.baseCurrency === conversion.baseCurrency,
-    );
+    return historyRef.current.some(item => item.amount === conversion.amount && item.baseCurrency === conversion.baseCurrency);
   };
 
   const addConversion = conversion => {
     if (!isDuplicate(conversion)) {
-      setHistory(prev => [
-        {
+      setHistory(prev => [{
           id: Date.now().toString(),
           timestamp: new Date().toISOString(),
           ...conversion,
@@ -119,15 +54,7 @@ export const HistoryProvider = ({children}) => {
   };
 
   return (
-    <HistoryContext.Provider
-      value={{
-        history,
-        baseCurrency,
-        baseAmount,
-        addConversion,
-        setBaseCurrency,
-        setBaseAmount,
-      }}>
+    <HistoryContext.Provider value={{ history, baseCurrency, baseAmount, addConversion, setBaseCurrency, setBaseAmount}}>
       {children}
     </HistoryContext.Provider>
   );
