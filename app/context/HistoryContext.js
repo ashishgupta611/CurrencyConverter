@@ -1,17 +1,17 @@
 import React, {createContext, useState, useEffect, useRef } from 'react';
-import { saveItem, loadStateItem } from '../services/StorageService';
+import { saveItem, loadStateItem, loadStateItems } from '../services/StorageService';
 import {STRINGS} from '../constants';
 
 const HistoryContext = createContext();
 
 export const HistoryProvider = ({children}) => {
   const [history, setHistory] = useState([]);
-  const [baseCurrency, setBaseCurrency] = useState(STRINGS.usd);
+  const [currency, setCurrency] = useState(STRINGS.usd);
   const [baseAmount, setBaseAmount] = useState('0');
   const historyRef = useRef(history);
 
   useEffect(() => {
-    loadStateItem(STRINGS.conversionHistory, setHistory);
+    loadStateItems(STRINGS.conversionHistory, setHistory);
   }, []);
 
   useEffect(() => {
@@ -19,7 +19,7 @@ export const HistoryProvider = ({children}) => {
   }, []);
 
   useEffect(() => {
-    loadStateItem(STRINGS.baseCurrency, setBaseCurrency);
+    loadStateItem(STRINGS.currency, setCurrency);
   }, []);
 
   useEffect(() => {
@@ -28,15 +28,15 @@ export const HistoryProvider = ({children}) => {
   }, [history]);
 
   useEffect(() => {
-    saveItem(STRINGS.baseCurrency, baseCurrency);
-  }, [baseCurrency]);
+    saveItem(STRINGS.currency, currency);
+  }, [currency]);
 
   useEffect(() => {
     saveItem(STRINGS.baseAmount, baseAmount);
   }, [baseAmount]);
 
   const isDuplicate = conversion => {
-    return historyRef.current.some(item => item.amount === conversion.amount && item.baseCurrency === conversion.baseCurrency);
+    return historyRef.current.some(item => item.amount === conversion.amount && item.currency === conversion.currency);
   };
 
   const addConversion = conversion => {
@@ -54,7 +54,7 @@ export const HistoryProvider = ({children}) => {
   };
 
   return (
-    <HistoryContext.Provider value={{ history, baseCurrency, baseAmount, addConversion, setBaseCurrency, setBaseAmount}}>
+    <HistoryContext.Provider value={{ history, currency, baseAmount, addConversion, setCurrency, setBaseAmount}}>
       {children}
     </HistoryContext.Provider>
   );

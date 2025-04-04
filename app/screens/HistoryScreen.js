@@ -6,11 +6,16 @@ import { styles } from '../styles/HistoryStyle';
 
 const HistoryScreen = () => {
   const navigation = useNavigation();
-  const { history, setBaseCurrency, setBaseAmount } = useContext(HistoryContext);
+  const { history, setCurrency, setBaseAmount } = useContext(HistoryContext);
+
+  const getItemDetails = (item) => {
+    let textDetails = `${item.amount} ${item.currency} → ${item.conversions.slice(0, 3).map(c => c.currency).join(', ')} ${item.conversions.length > 3 && '...'}`;
+    return textDetails;
+  };
 
   const handleItemPress = (item) => {
     navigation.goBack();
-    setBaseCurrency(item.baseCurrency);
+    setCurrency(item.currency);
     setBaseAmount(`${item.amount}`);
   };
 
@@ -28,9 +33,7 @@ const HistoryScreen = () => {
               {new Date(item.timestamp).toLocaleDateString()}
             </Text>
             <Text style={styles.conversionText}>
-              {item.amount} {item.baseCurrency} →{' '}
-              {item.conversions.slice(0, 3).map(c => c.currency).join(', ')}
-              {item.conversions.length > 3 && '...'}
+              {getItemDetails(item)}
             </Text>
           </TouchableOpacity>
         )}

@@ -18,5 +18,5 @@ export const STRINGS = {
   aud:'AUD',
   conversionHistory: 'conversionHistory',
   baseAmount: 'baseAmount',
-  baseCurrency: 'baseCurrency'
+  currency: 'currency'
 };

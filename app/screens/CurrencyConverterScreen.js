@@ -2,8 +2,7 @@ import React, {
   useState,
   useContext,
   useEffect,
-  useCallback,
-  useRef,
+  useCallback
 } from 'react';
 import {
   View,
@@ -23,50 +22,37 @@ const CurrencyConverterScreen = () => {
   const navigation = useNavigation();
 
   const {
-    baseCurrency,
+    currency,
     baseAmount,
     addConversion,
-    setBaseCurrency,
+    setCurrency,
     setBaseAmount,
   } = useContext(HistoryContext);
   const [results, setResults] = useState([]);
   const [amount, setAmount] = useState(baseAmount);
-  const baseAmountRef = useRef(baseAmount);
-  const baseCurrencyRef = useRef(baseCurrency);
-
-  useEffect(() => {
-    if (results.length > 0 && baseAmountRef.current !== amount) {
-      setResults([]);
-    }
-  }, [amount]);
+  
 
   useEffect(() => {
     setAmount(baseAmount);
   }, [baseAmount]);
 
   useEffect(() => {
-    if (baseAmountRef.current !== baseAmount && baseCurrencyRef.current !== baseCurrency) {
-      const conversions = getConversions(baseAmount);
-      setResults(conversions);
-    }
-    else if (results.length > 0) {
-      setResults([]);
-    }
-    baseAmountRef.current = baseAmount;
-    baseCurrencyRef.current = baseCurrency;
-  }, [baseAmount, baseCurrency]);
+    setResults([]);
+  }, [currency]);
 
-  const getConversions = (conversionAmount) => {
-      return Object.entries(CURRENCY_RATES)
-        .filter(([currency]) => currency !== baseCurrency)
-        .map(([currency, rate]) => ({
-          currency,
-          value: (
-            conversionAmount *
-            (rate / CURRENCY_RATES[baseCurrency])
-          ).toFixed(2),
-        }));
-    };
+  const getConversionAmount = (conversionAmount, rate) => {
+    let value = conversionAmount * (rate / CURRENCY_RATES[currency]);
+    return value.toFixed(2);
+  };
+
+  const getConversions = conversionAmount => {    
+    return Object.entries(CURRENCY_RATES)
+      .filter(([currency_name]) => currency_name !== currency)
+      .map(([currency_name, rate]) => ({
+        currency: currency_name,
+        value: getConversionAmount(conversionAmount, rate)
+      }));
+  };
 
   const handleConvert = useCallback(() => {
     const numericAmount = parseFloat(amount);
@@ -77,8 +63,8 @@ const CurrencyConverterScreen = () => {
     const conversions = getConversions(numericAmount);
     setResults(conversions);
     setBaseAmount(`${amount}`);
-    addConversion({baseCurrency, amount: numericAmount, conversions});
-  }, [baseCurrency, amount]);
+    addConversion({currency, amount: numericAmount, conversions});
+  }, [currency, amount]);
 
   return (
     <View style={styles.container}>
@@ -89,8 +75,8 @@ const CurrencyConverterScreen = () => {
       </TouchableOpacity>
       <Text style={styles.title}>Currency Converter</Text>
       <Picker
-        selectedValue={baseCurrency}
-        onValueChange={setBaseCurrency}
+        selectedValue={currency}
+        onValueChange={setCurrency}
         style={styles.picker}>
         {Object.keys(CURRENCY_RATES).map(currency => (
           <Picker.Item key={currency} label={currency} value={currency} />
@@ -104,7 +90,7 @@ const CurrencyConverterScreen = () => {
           value={amount}
           onChangeText={setAmount}
         />
-        <Text style={styles.currencyCode}>{baseCurrency}</Text>
+        <Text style={styles.currencyCode}>{currency}</Text>
       </View>
       <Button title="Convert" onPress={handleConvert} />
       <FlatList
